@@ -1,6 +1,6 @@
 const express = require('express')
+const morgan = require('morgan')
 const app = express()
-
 app.use(express.json())
 let data = [
     { 
@@ -24,9 +24,14 @@ let data = [
       "number": "39-23-6423122"
     }
 ]
+morgan.token('body', (req,res) => {return JSON.stringify({name: req.body.name, number: req.body.number})})
+app.use(morgan('tiny'))
+app.get('/', (req,res) => {
+  res.send('Welcome to my page')
+})
 
-app.get('/api/persons', (request, response) => {
-    response.json(data)
+app.get('/api/persons', (req, res) => {
+    res.json(data)
 })
 const generateId = () => {
   const maxId = data.length > 0
@@ -34,7 +39,7 @@ const generateId = () => {
   : 0
  return maxId + 1
 }
-app.post('/api/persons', (req, res) => {
+app.post('/api/persons', morgan(`:method :url :status :res[content-length] - :response-time ms :body`), (req, res) => {
   const body = req.body
   if(!body.name) res.status(400).json({ error: 'content missing'})
   if(data.filter(d => d.name.match(body.name)).length === 1) res.status(400).json({error: 'name must be unique'})
