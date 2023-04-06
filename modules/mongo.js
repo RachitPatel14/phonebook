@@ -37,4 +37,3 @@ phoneSchema.set('toJSON', {
 })
 
 module.exports = mongoose.model('Person', phoneSchema)
-
